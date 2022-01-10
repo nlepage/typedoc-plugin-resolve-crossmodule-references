@@ -1,0 +1,12 @@
+{
+  "entryPointStrategy": "packages",
+  "entryPoints": [
+    "packages/a",
+    "packages/b"
+  ],
+  "gitRevision": "main",
+  "json": "test.json",
+  "plugin": [
+    ".."
+  ]
+}
