@@ -25,10 +25,21 @@ test.before(async (t) => {
   t.true(typeAliasA != null, 'type A is defined')
 })
 
-test('property A.b should have a type reference id', (t) => {
+test('property type should have a type reference id', (t) => {
   const propertyB = getChildByName(typeA, 'b')
   t.true(propertyB != null, 'property b is defined')
+  t.is(propertyB?.type?.type, 'reference', 'property b should have a reference type')
   t.true((propertyB?.type as JSONOutput.ReferenceType).id != null, 'property b has a type reference id')
+})
+
+test.failing('array property element type should have a type reference id', (t) => {
+  const propertyBArray = getChildByName(typeA, 'bArray')
+  t.true(propertyBArray != null, 'property bArray is defined')
+  t.is(propertyBArray?.type?.type, 'array', 'property b should have am array type')
+
+  const elementType = (propertyBArray?.type as JSONOutput.ArrayType).elementType
+  t.is(elementType?.type, 'reference', 'property bArray element type should be a reference type')
+  t.true((elementType as JSONOutput.ReferenceType).id != null, 'property bArray element type has a type reference id')
 })
 
 function getChildByName(container: JSONOutput.ContainerReflection | undefined, name: string) {
