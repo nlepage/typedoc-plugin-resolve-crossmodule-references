@@ -1,1 +1,1 @@
-export type B = {}
+export type B = { b: boolean }
