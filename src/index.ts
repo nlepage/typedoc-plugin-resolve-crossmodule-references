@@ -133,9 +133,9 @@ function findSymbolSourceFile(symbol: TSSymbol, project: ProjectReflection) {
     const sources = srcMapConverter.toObject().sources as string[]
 
     for (const source of sources) {
-      const srcFileName = path.resolve(srcDirPath, source)
+      const srcFileName = path.resolve(srcDirPath, source).replace(/\\/g, '/')
 
-      const srcFile = project.files.find(({ fullFileName }) => fullFileName === srcFileName)
+      const srcFile = project.files.find(({ fullFileName }) => fullFileName.replace(/\\/g, '/') === srcFileName)
       if (!srcFile) continue
 
       return srcFile
