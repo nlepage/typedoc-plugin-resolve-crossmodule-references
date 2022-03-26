@@ -1,21 +1,22 @@
-import { fromSource, fromMapFileSource } from 'convert-source-map'
+import { fromMapFileSource, fromSource } from 'convert-source-map'
 import path from 'path'
 import {
   Application,
-  Converter,
   Context,
-  Reflection,
+  Converter,
   DeclarationReflection,
-  ReferenceType,
-  ProjectReflection,
-  makeRecursiveVisitor,
   ParameterReflection,
-  Type,
-  SomeType,
+  ProjectReflection,
+  ReferenceType,
+  Reflection,
   SignatureReflection,
+  SomeType,
+  Type,
+  TypeKindMap,
   TypeParameterReflection,
 } from 'typedoc'
 import { Symbol as TSSymbol } from 'typescript'
+import { TypeKind } from 'typedoc/dist/lib/models/types'
 
 export function load(app: Application) {
   app.converter.on(Converter.EVENT_RESOLVE, visitReflection)
@@ -24,82 +25,165 @@ export function load(app: Application) {
 function visitReflection(context: Context, reflection: Reflection) {
   if (!isTypedReflection(reflection)) return
 
-  checkTyped(context, reflection, 'type')
+  const reflectionType = reflection.type
+  if (!reflectionType) return
 
-  reflection.type?.visit(
-    makeRecursiveVisitor({
-      array(type) {
-        checkTyped(context, type, 'elementType')
-      },
-      conditional(type) {
-        checkTyped(context, type, 'checkType')
-        checkTyped(context, type, 'trueType')
-        checkTyped(context, type, 'falseType')
-        checkTyped(context, type, 'extendsType')
-      },
-      indexedAccess(type) {
-        checkTyped(context, type, 'indexType')
-        checkTyped(context, type, 'objectType')
-      },
-      intersection(type) {
-        checkTyped(context, type, 'types')
-      },
-      mapped(type) {
-        checkTyped(context, type, 'nameType')
-        checkTyped(context, type, 'parameterType')
-        checkTyped(context, type, 'templateType')
-      },
-      'named-tuple-member'(type) {
-        checkTyped(context, type, 'element')
-      },
-      optional(type) {
-        checkTyped(context, type, 'elementType')
-      },
-      predicate(type) {
-        checkTyped(context, type, 'targetType')
-      },
-      query(type) {
-        checkTyped(context, type, 'queryType')
-      },
-      reference(type) {
-        checkTyped(context, type, 'typeArguments')
-      },
-      reflection(type) {
-        checkTyped(context, type.declaration, 'type')
-      },
-      rest(type) {
-        checkTyped(context, type, 'elementType')
-      },
-      tuple(type) {
-        checkTyped(context, type, 'elements')
-      },
-      // FIXME template-literal?
-      typeOperator(type) {
-        checkTyped(context, type, 'target')
-      },
-      union(type) {
-        checkTyped(context, type, 'types')
-      },
-    })
-  )
+  const visitor = makeRecursiveMutatingVisitor({
+    reference(type) {
+      return fixType(context, type)
+    },
+  })
+
+  reflection.type = (visitor[reflectionType.type]?.(reflectionType as never) ?? reflectionType) as any
 }
 
 type Typed<F extends string> = { [k in F]?: Type | SomeType | Type[] | undefined }
 
-function checkTyped<F extends string>(context: Context, typed: Typed<F>, f: F) {
-  const type = typed[f]
+type MutatingTypeVisitor = {
+  [K in TypeKind]: (type: TypeKindMap[K]) => TypeKindMap[K]
+}
 
-  if (Array.isArray(type)) {
-    type.forEach((iType, i) => {
-      if (!isReferenceType(iType)) return
+type InnerTypeMembers<T extends Type> = {
+  [K in keyof T as T[K] extends Type | undefined ? K : never]: T[K]
+}
 
-      type[i] = fixType(context, iType)
-    })
-  } else {
-    if (!isReferenceType(type)) return
+type InnerTypesMembers<T extends Type> = {
+  [K in keyof T as T[K] extends (infer IT)[] | undefined
+    ? IT extends Type | undefined
+      ? K
+      : never
+    : never]: T[K] extends (infer IT)[] ? IT : never
+}
 
-    typed[f] = fixType(context, type)
+function makeRecursiveMutatingVisitor(visitor: Partial<MutatingTypeVisitor>): MutatingTypeVisitor {
+  // visit a Type member
+  const memberVisit = <T extends keyof TypeKindMap, TT extends TypeKindMap[T], K extends keyof InnerTypeMembers<TT>>(
+    type: TT,
+    memberName: K
+  ) => {
+    const innerType = type[memberName] as never as Type
+    if (innerType) {
+      type[memberName] = (recursiveVisitor[innerType.type]?.(innerType as never) ?? innerType) as never as TT[K]
+    }
   }
+  // visit a Type[] member
+  const membersVisit = <T extends keyof TypeKindMap, TT extends TypeKindMap[T], K extends keyof InnerTypesMembers<TT>>(
+    type: TT,
+    memberName: K
+  ) => {
+    const innerTypes = type[memberName] as never as Type[]
+    innerTypes?.forEach((innerType, i) => {
+      if (innerType) {
+        innerTypes[i] = (recursiveVisitor[innerType.type]?.(innerType as never) ?? innerTypes[i]) as never as Type
+      }
+    })
+  }
+  const recursiveVisitor: MutatingTypeVisitor = {
+    'named-tuple-member'(type) {
+      const mutated = visitor['named-tuple-member']?.(type) ?? type
+      memberVisit(mutated, 'element')
+      return mutated
+    },
+    'template-literal'(type) {
+      const mutated = visitor['template-literal']?.(type) ?? type
+      mutated.tail.forEach(([innerType], i) => {
+        mutated.tail[i][0] =
+          recursiveVisitor[mutated.tail[i][0].type]?.(mutated.tail[i][0] as never) ?? mutated.tail[i][0]
+      })
+      return mutated
+    },
+    array(type) {
+      const mutated = visitor.array?.(type) ?? type
+      memberVisit(mutated, 'elementType')
+      return mutated
+    },
+    conditional(type) {
+      const mutated = visitor.conditional?.(type) ?? type
+      memberVisit(mutated, 'checkType')
+      memberVisit(mutated, 'extendsType')
+      memberVisit(mutated, 'trueType')
+      memberVisit(mutated, 'falseType')
+      return mutated
+    },
+    indexedAccess(type) {
+      const mutated = visitor.indexedAccess?.(type) ?? type
+      memberVisit(mutated, 'indexType')
+      memberVisit(mutated, 'objectType')
+      return mutated
+    },
+    inferred(type) {
+      return visitor.inferred?.(type) ?? type
+    },
+    intersection(type) {
+      const mutated = visitor.intersection?.(type) ?? type
+      membersVisit(mutated, 'types')
+      return mutated
+    },
+    intrinsic(type) {
+      return visitor.intrinsic?.(type) ?? type
+    },
+    literal(type) {
+      return visitor.literal?.(type) ?? type
+    },
+    mapped(type) {
+      const mutated = visitor.mapped?.(type) ?? type
+      memberVisit(mutated, 'nameType')
+      memberVisit(mutated, 'parameterType')
+      memberVisit(mutated, 'templateType')
+      return mutated
+    },
+    optional(type) {
+      const mutated = visitor.optional?.(type) ?? type
+      memberVisit(mutated, 'elementType')
+      return mutated
+    },
+    predicate(type) {
+      const mutated = visitor.predicate?.(type) ?? type
+      memberVisit(mutated, 'targetType')
+      return mutated
+    },
+    query(type) {
+      const mutated = visitor.query?.(type) ?? type
+      memberVisit(mutated, 'queryType')
+      return mutated
+    },
+    reference(type) {
+      const mutated = visitor.reference?.(type) ?? type
+      membersVisit(mutated, 'typeArguments')
+      return mutated
+    },
+    reflection(type) {
+      const mutated = visitor.reflection?.(type) ?? type
+      // Note: The below comment is from the original typedoc visitor function
+      // Future: This should maybe recurse too?
+      // See the validator in exports.ts for how to do it.
+      return mutated
+    },
+    rest(type) {
+      const mutated = visitor.rest?.(type) ?? type
+      memberVisit(mutated, 'elementType')
+      return mutated
+    },
+    tuple(type) {
+      const mutated = visitor.tuple?.(type) ?? type
+      membersVisit(mutated, 'elements')
+      return mutated
+    },
+    typeOperator(type) {
+      const mutated = visitor.typeOperator?.(type) ?? type
+      memberVisit(mutated, 'target')
+      return mutated
+    },
+    union(type) {
+      const mutated = visitor.union?.(type) ?? type
+      membersVisit(mutated, 'types')
+      return mutated
+    },
+    unknown(type) {
+      return visitor.unknown?.(type) ?? type
+    },
+  }
+  return recursiveVisitor
 }
 
 function fixType(context: Context, type: ReferenceType) {
@@ -149,10 +233,6 @@ function findSymbolSourceFile(symbol: TSSymbol, project: ProjectReflection) {
   }
 
   return undefined
-}
-
-function isReferenceType(type?: Type | SomeType): type is ReferenceType {
-  return type?.type === 'reference'
 }
 
 function isReferenceTypeBroken(type: ReferenceType) {
