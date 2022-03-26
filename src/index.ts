@@ -124,8 +124,14 @@ function findSymbolSourceFile(symbol: TSSymbol, project: ProjectReflection) {
 
   for (const declaration of declarations) {
     const declSrcFile = declaration.getSourceFile()
+    const declSrcFileName = declSrcFile.fileName
 
-    const srcDirPath = path.dirname(declSrcFile.fileName)
+    // Find without using source maps
+    const directSrcFile = project.files.find(({ fullFileName }) => fullFileName === declSrcFileName)
+    if (directSrcFile) return directSrcFile
+
+    // Find using source map
+    const srcDirPath = path.dirname(declSrcFileName)
 
     const srcMapConverter = fromSource(declSrcFile.text) ?? fromMapFileSource(declSrcFile.text, srcDirPath)
     if (!srcMapConverter) continue
