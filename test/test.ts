@@ -62,6 +62,59 @@ test('should resolve references on class CA', (t) => {
   t.is(privateBArray.setSignature?.parameters[0]?.type?.elementType?.id, typeBId, 'privateBArray setter refers to B')
 })
 
+test('should resolve references in type conditions', (t) => {
+  const conditional = getChildByName(moduleA, 'Conditional')
+  t.is(conditional?.type?.falseType?.id, typeBId, 'false type of Conditional refers to B')
+
+  const inferred = getChildByName(moduleA, 'Inferred')
+  t.is(inferred?.type?.falseType?.id, typeBId, 'false type of Inferred refers to B')
+})
+
+test('should resolve references in indexed types', (t) => {
+  const indexed = getChildByName(moduleA, 'Indexed')
+  t.is(indexed?.type?.objectType?.id, typeBId, 'object type of Indexed refers to B')
+})
+
+test('should resolve references in type intersections', (t) => {
+  const intersection = getChildByName(moduleA, 'Intersection')
+  t.is(findByName(intersection?.type?.types, 'B')?.id, typeBId, 'object type of Intersection refers to B')
+})
+
+test('should resolve references in mapped types', (t) => {
+  const mapped = getChildByName(moduleA, 'Mapped')
+  t.is(mapped?.type?.templateType?.id, typeBId, 'template type of Mapped refers to B')
+})
+
+test('should resolve references in tuple types', (t) => {
+  const namedTuple = getChildByName(moduleA, 'NamedTuple')
+  t.is(namedTuple?.type?.elements?.[0]?.element?.id, typeBId, 'element type of NamedTuple refers to B')
+
+  const tuple = getChildByName(moduleA, 'Tuple')
+  t.is(tuple?.type?.elements?.[0]?.id, typeBId, 'element type of Tuple refers to B')
+  t.is(tuple?.type?.elements?.[1]?.id, typeBId, 'element type of Tuple refers to B')
+  t.is(tuple?.type?.elements?.[2]?.id, typeBId, 'element type of Tuple refers to B')
+
+  const rest = getChildByName(moduleA, 'Rest')
+  t.is(rest?.type?.elements?.[1]?.elementType?.elements?.[0]?.id, typeBId, 'rest element type in Rest refers to B')
+  t.is(rest?.type?.elements?.[1]?.elementType?.elements?.[1]?.id, typeBId, 'rest element type in Rest refers to B')
+  t.is(rest?.type?.elements?.[1]?.elementType?.elements?.[2]?.id, typeBId, 'rest element type in Rest refers to B')
+})
+
+test('should resolve references in predicate types', (t) => {
+  const predicate = getChildByName(moduleA, 'Predicate')
+  t.is(findByName(predicate?.type?.declaration?.signatures?.[0]?.parameters, 'b')?.type?.id, typeBId, 'parameter type of Predicate refers to B')
+  t.is(predicate?.type?.declaration?.signatures?.[0]?.type?.targetType?.id, typeBId, 'return type of Predicate refers to B')
+})
+
+test('should resolve references in type unions', (t) => {
+  const union = getChildByName(moduleA, 'Union')
+  t.is(findByName(union?.type?.types, 'B')?.id, typeBId, 'object type of Union refers to B')
+})
+
 function getChildByName(container: any, name: string) {
-  return container?.children?.find((child: any) => child.name === name)
+  return findByName(container?.children, name)
+}
+
+function findByName(elements: any, name: string) {
+  return elements?.find((element: any) => element?.name === name)
 }
