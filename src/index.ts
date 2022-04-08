@@ -115,10 +115,7 @@ function getSourcesReferenceType(type: ReferenceType, project: ProjectReflection
   const newTargetReflection = srcFile.reflections.find(({ name }) => name === type.name)
   if (!newTargetReflection) return null
 
-  const newTargetSymbol = project.getSymbolFromReflection(newTargetReflection)
-  if (!newTargetSymbol) return null
-
-  return new ReferenceType(type.name, newTargetSymbol, project)
+  return ReferenceType.createResolvedReference(type.name, newTargetReflection, project)
 }
 
 function findSymbolSourceFile(symbol: TSSymbol, project: ProjectReflection) {
