@@ -164,13 +164,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@types/convert-source-map@npm:^1.5.2":
-  version: 1.5.2
-  resolution: "@types/convert-source-map@npm:1.5.2"
-  checksum: 39ab9185ab45567a47cdaa2262fdc55aaf79a6658574eb514f2b90195505fa026b03c7f9147e61100ed21eb71adbb350997e24c9ddd9512408dcb9820d6c5e9a
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:^17.0.23":
   version: 17.0.23
   resolution: "@types/node@npm:17.0.23"
@@ -709,15 +702,6 @@ __metadata:
   version: 1.1.0
   resolution: "console-control-strings@npm:1.1.0"
   checksum: 8755d76787f94e6cf79ce4666f0c5519906d7f5b02d4b884cf41e11dcd759ed69c57da0670afd9236d229a46e0f9cf519db0cd829c6dca820bb5a5c3def584ed
-  languageName: node
-  linkType: hard
-
-"convert-source-map@npm:^1.8.0":
-  version: 1.8.0
-  resolution: "convert-source-map@npm:1.8.0"
-  dependencies:
-    safe-buffer: ~5.1.1
-  checksum: 985d974a2d33e1a2543ada51c93e1ba2f73eaed608dc39f229afc78f71dcc4c8b7d7c684aa647e3c6a3a204027444d69e53e169ce94e8d1fa8d7dee80c9c8fed
   languageName: node
   linkType: hard
 
@@ -2130,13 +2114,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"safe-buffer@npm:~5.1.1":
-  version: 5.1.2
-  resolution: "safe-buffer@npm:5.1.2"
-  checksum: f2f1f7943ca44a594893a852894055cf619c1fbcb611237fc39e461ae751187e7baf4dc391a72125e0ac4fb2d8c5c0b3c71529622e6a58f46b960211e704903c
-  languageName: node
-  linkType: hard
-
 "safe-buffer@npm:~5.2.0":
   version: 5.2.1
   resolution: "safe-buffer@npm:5.2.1"
@@ -2543,10 +2520,8 @@ __metadata:
   dependencies:
     "@ava/typescript": ^3.0.1
     "@tsconfig/node14": ^1.0.1
-    "@types/convert-source-map": ^1.5.2
     "@types/node": ^17.0.23
     ava: ^4.1.0
-    convert-source-map: ^1.8.0
     prettier: ^2.6.2
     ts-node: ^10.7.0
     tslint: ^6.1.3
