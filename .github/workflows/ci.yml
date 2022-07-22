@@ -15,7 +15,7 @@ jobs:
     - name: Install Node.js 14
       uses: actions/setup-node@v2
       with:
-        node-version: 14
+        node-version: 16
     - name: Install dependencies
       run: yarn install --immutable
     - name: CI
