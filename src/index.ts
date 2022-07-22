@@ -1,5 +1,3 @@
-import { fromSource, fromMapFileSource } from 'convert-source-map'
-import path from 'path'
 import {
   Application,
   Converter,
@@ -14,8 +12,8 @@ import {
   SomeType,
   SignatureReflection,
   TypeParameterReflection,
+  ReflectionKind,
 } from 'typedoc'
-import { Symbol as TSSymbol } from 'typescript'
 
 export function load(app: Application) {
   app.converter.on(Converter.EVENT_RESOLVE, visitReflection)
@@ -105,44 +103,14 @@ function checkTyped<F extends string>(context: Context, typed: Typed<F>, f: F) {
 function fixType(context: Context, type: ReferenceType) {
   if (!isReferenceTypeBroken(type)) return type
 
-  return getSourcesReferenceType(type, context.project) ?? type
+  return findReferenceType(type, context.project) ?? type
 }
 
-function getSourcesReferenceType(type: ReferenceType, project: ProjectReflection) {
-  const srcFile = findSymbolSourceFile(type.getSymbol() as TSSymbol, project)
-  if (!srcFile) return null
-
-  const newTargetReflection = srcFile.reflections.find(({ name }) => name === type.name)
+function findReferenceType(type: ReferenceType, project: ProjectReflection) {
+  const newTargetReflection = project.getReflectionsByKind(ReflectionKind.All).find(({ name }) => name === type.name)
   if (!newTargetReflection) return null
 
   return ReferenceType.createResolvedReference(type.name, newTargetReflection, project)
-}
-
-function findSymbolSourceFile(symbol: TSSymbol, project: ProjectReflection) {
-  const declarations = symbol.getDeclarations()
-  if (!declarations) return undefined
-
-  for (const declaration of declarations) {
-    const declSrcFile = declaration.getSourceFile()
-
-    const srcDirPath = path.dirname(declSrcFile.fileName)
-
-    const srcMapConverter = fromSource(declSrcFile.text) ?? fromMapFileSource(declSrcFile.text, srcDirPath)
-    if (!srcMapConverter) continue
-
-    const sources = srcMapConverter.toObject().sources as string[]
-
-    for (const source of sources) {
-      const srcFileName = path.resolve(srcDirPath, source)
-
-      const srcFile = project.files.find(({ fullFileName }) => fullFileName === srcFileName)
-      if (!srcFile) continue
-
-      return srcFile
-    }
-  }
-
-  return undefined
 }
 
 function isReferenceType(type?: Type | SomeType): type is ReferenceType {
