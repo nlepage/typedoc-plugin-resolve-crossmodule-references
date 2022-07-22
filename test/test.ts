@@ -54,12 +54,12 @@ test('should resolve references on class CA', (t) => {
   t.is(getChildByName(classCA, 'setBArray')?.signatures?.[0]?.parameters[0]?.type?.elementType?.id, typeBId, 'parameter of method setBArray refers to B')
 
   const privateB = getChildByName(classCA, 'privateB')
-  t.is(privateB.getSignature[0]?.type?.id, typeBId, 'privateB getter refers to B')
-  t.is(privateB.setSignature[0]?.parameters[0]?.type?.id, typeBId, 'privateB setter refers to B')
+  t.is(privateB.getSignature?.type?.id, typeBId, 'privateB getter refers to B')
+  t.is(privateB.setSignature?.parameters[0]?.type?.id, typeBId, 'privateB setter refers to B')
 
   const privateBArray = getChildByName(classCA, 'privateBArray')
-  t.is(privateBArray.getSignature[0]?.type?.elementType?.id, typeBId, 'privateBArray getter refers to B')
-  t.is(privateBArray.setSignature[0]?.parameters[0]?.type?.elementType?.id, typeBId, 'privateBArray setter refers to B')
+  t.is(privateBArray.getSignature?.type?.elementType?.id, typeBId, 'privateBArray getter refers to B')
+  t.is(privateBArray.setSignature?.parameters[0]?.type?.elementType?.id, typeBId, 'privateBArray setter refers to B')
 })
 
 function getChildByName(container: any, name: string) {
