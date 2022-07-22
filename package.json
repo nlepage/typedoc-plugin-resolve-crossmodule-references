@@ -23,7 +23,7 @@
   ],
   "packageManager": "yarn@3.1.1",
   "peerDependencies": {
-    "typedoc": "*"
+    "typedoc": ">=0.22 <=0.23"
   },
   "devDependencies": {
     "@ava/typescript": "^3.0.1",
