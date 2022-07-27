@@ -6,6 +6,7 @@ let project: any
 let moduleA: any
 let moduleB: any
 let typeBId: any
+let interfaceIBId: any
 
 test.before(async (t) => {
   const json = await fs.readFile(path.resolve(__dirname, 'test.json'))
@@ -13,6 +14,7 @@ test.before(async (t) => {
   moduleA = getChildByName(project, '@typedoc-plugin-resolve-crossmodule-references/a')
   moduleB = getChildByName(project, '@typedoc-plugin-resolve-crossmodule-references/b')
   typeBId = getChildByName(moduleB, 'B').id
+  interfaceIBId = getChildByName(moduleB, 'IB').id
 })
 
 test('should resolve references on variables', (t) => {
@@ -114,9 +116,19 @@ test('should resolve references in type unions', (t) => {
 })
 
 test('should resolve references in implements', (t) => {
-  const interfaceIB = getChildByName(moduleB, 'IB')
   const classImplementsIB = getChildByName(moduleA, 'ImplementsIB')
-  t.is(classImplementsIB.implementedTypes[0].id, interfaceIB.id, 'implements of class refers to interface IB')
+  t.is(classImplementsIB.implementedTypes[0].id, interfaceIBId, 'implements of class refers to interface IB')
+})
+
+test('should resolve references in interface extends', (t) => {
+  const interfaceExtendsIB = getChildByName(moduleA, 'ExtendsIB')
+  t.is(interfaceExtendsIB.extendedTypes[0].id, interfaceIBId, 'extends of interface refers to interface IB')
+})
+
+test('should resolve references in class extends', (t) => {
+  const classCBId = getChildByName(moduleB, 'CB').id
+  const classExtendsCB = getChildByName(moduleA, 'ExtendsCB')
+  t.is(classExtendsCB.extendedTypes[0].id, classCBId, 'extends of class refers to class CB')
 })
 
 function getChildByName(container: any, name: string) {

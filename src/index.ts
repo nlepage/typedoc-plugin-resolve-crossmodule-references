@@ -25,6 +25,7 @@ function visitReflection(context: Context, reflection: Reflection) {
   fixTyped(context, reflection, 'type')
 
   if (reflection instanceof DeclarationReflection) {
+    fixTyped(context, reflection, 'extendedTypes')
     fixTyped(context, reflection, 'implementedTypes')
   }
 
