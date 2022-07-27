@@ -20,84 +20,96 @@ export function load(app: Application) {
 }
 
 function visitReflection(context: Context, reflection: Reflection) {
-  if (!isTypedReflection(reflection)) return
-
-  fixTyped(context, reflection, 'type')
-
-  if (reflection instanceof DeclarationReflection) {
-    fixTyped(context, reflection, 'extendedTypes')
-    fixTyped(context, reflection, 'implementedTypes')
+  if (isTypedReflection(reflection)) {
+    recursivelyFixTyped(context, reflection, 'type')
   }
 
-  reflection.type?.visit(
-    makeRecursiveVisitor({
-      array(type) {
-        fixTyped(context, type, 'elementType')
-      },
-      conditional(type) {
-        fixTyped(context, type, 'checkType')
-        fixTyped(context, type, 'trueType')
-        fixTyped(context, type, 'falseType')
-        fixTyped(context, type, 'extendsType')
-      },
-      indexedAccess(type) {
-        fixTyped(context, type, 'indexType')
-        fixTyped(context, type, 'objectType')
-      },
-      intersection(type) {
-        fixTyped(context, type, 'types')
-      },
-      mapped(type) {
-        fixTyped(context, type, 'nameType')
-        fixTyped(context, type, 'parameterType')
-        fixTyped(context, type, 'templateType')
-      },
-      'named-tuple-member'(type) {
-        fixTyped(context, type, 'element')
-      },
-      optional(type) {
-        fixTyped(context, type, 'elementType')
-      },
-      predicate(type) {
-        fixTyped(context, type, 'targetType')
-      },
-      query(type) {
-        fixTyped(context, type, 'queryType')
-      },
-      reference(type) {
-        fixTyped(context, type, 'typeArguments')
-      },
-      reflection(type) {
-        fixTyped(context, type.declaration, 'type')
-      },
-      rest(type) {
-        fixTyped(context, type, 'elementType')
-      },
-      tuple(type) {
-        fixTyped(context, type, 'elements')
-      },
-      // FIXME template-literal?
-      typeOperator(type) {
-        fixTyped(context, type, 'target')
-      },
-      union(type) {
-        fixTyped(context, type, 'types')
-      },
-    })
-  )
+  if (reflection instanceof DeclarationReflection) {
+    recursivelyFixTyped(context, reflection, 'extendedTypes')
+    recursivelyFixTyped(context, reflection, 'implementedTypes')
+  }
 }
 
 type Typed<F extends string> = { [k in F]?: Type | SomeType | Type[] | undefined }
 
-function fixTyped<F extends string>(context: Context, typed: Typed<F>, f: F) {
-  const type = typed[f]
-  if (!type) return
-  if (Array.isArray(type)) {
-    type.forEach((iType, i) => {
-      type[i] = fixType(context, iType)
+function recursivelyFixTyped<F extends string>(context: Context, typed: Typed<F>, f: F) {
+  fixTyped(context, typed, f)
+
+  const typedField = typed[f]
+  if (!typedField) return
+
+  const visitor = makeRecursiveVisitor({
+    array(type) {
+      fixTyped(context, type, 'elementType')
+    },
+    conditional(type) {
+      fixTyped(context, type, 'checkType')
+      fixTyped(context, type, 'trueType')
+      fixTyped(context, type, 'falseType')
+      fixTyped(context, type, 'extendsType')
+    },
+    indexedAccess(type) {
+      fixTyped(context, type, 'indexType')
+      fixTyped(context, type, 'objectType')
+    },
+    intersection(type) {
+      fixTyped(context, type, 'types')
+    },
+    mapped(type) {
+      fixTyped(context, type, 'nameType')
+      fixTyped(context, type, 'parameterType')
+      fixTyped(context, type, 'templateType')
+    },
+    'named-tuple-member'(type) {
+      fixTyped(context, type, 'element')
+    },
+    optional(type) {
+      fixTyped(context, type, 'elementType')
+    },
+    predicate(type) {
+      fixTyped(context, type, 'targetType')
+    },
+    query(type) {
+      fixTyped(context, type, 'queryType')
+    },
+    reference(type) {
+      fixTyped(context, type, 'typeArguments')
+    },
+    reflection(type) {
+      fixTyped(context, type.declaration, 'type')
+    },
+    rest(type) {
+      fixTyped(context, type, 'elementType')
+    },
+    tuple(type) {
+      fixTyped(context, type, 'elements')
+    },
+    // FIXME template-literal?
+    typeOperator(type) {
+      fixTyped(context, type, 'target')
+    },
+    union(type) {
+      fixTyped(context, type, 'types')
+    },
+  })
+
+  if (Array.isArray(typedField)) {
+    typedField.forEach((type) => type.visit(visitor))
+  } else {
+    typedField.visit(visitor)
+  }
+}
+
+function fixTyped<F extends string>(context: Context, typed: Typed<F>, field: F) {
+  const typedField = typed[field]
+  if (!typedField) return
+
+  if (Array.isArray(typedField)) {
+    typedField.forEach((iType, i) => {
+      typedField[i] = fixType(context, iType)
     })
   } else {
-    typed[f] = fixType(context, type)
+    typed[field] = fixType(context, typedField)
   }
 }
 
