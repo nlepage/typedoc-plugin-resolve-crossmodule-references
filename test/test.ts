@@ -131,6 +131,13 @@ test('should resolve references in class extends', (t) => {
   t.is(classExtendsCB.extendedTypes[0].id, classCBId, 'extends of class refers to class CB')
 })
 
+test('should keep type arguments', (t) => {
+  const typePBId = getChildByName(moduleB, 'PB').id
+  const variablePb = getChildByName(moduleA, 'pb')
+  t.is(variablePb?.type?.id, typePBId, 'variable pb refers to type PB')
+  t.deepEqual(variablePb?.type?.typeArguments, [{ type: 'intrinsic', name: 'string' }], 'variable pb has type arguments')
+})
+
 function getChildByName(container: any, name: string) {
   return findByName(container?.children, name)
 }
