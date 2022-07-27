@@ -1,4 +1,4 @@
-import { B } from '@typedoc-plugin-resolve-crossmodule-references/b'
+import { B, IB } from '@typedoc-plugin-resolve-crossmodule-references/b'
 
 export const b: B = { b: true }
 export const bArray: B[] = []
@@ -100,4 +100,6 @@ export type NamedTuple = [name: B]
 
 export class TypeOperator<T extends keyof CA> {}
 
-
+export class ImplementsIB implements IB {
+  b = false
+}

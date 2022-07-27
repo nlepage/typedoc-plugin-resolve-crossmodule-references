@@ -4,13 +4,15 @@ import path from 'path'
 
 let project: any
 let moduleA: any
+let moduleB: any
 let typeBId: any
 
 test.before(async (t) => {
   const json = await fs.readFile(path.resolve(__dirname, 'test.json'))
   project = JSON.parse(json.toString('utf8'))
   moduleA = getChildByName(project, '@typedoc-plugin-resolve-crossmodule-references/a')
-  typeBId = getChildByName(getChildByName(project, '@typedoc-plugin-resolve-crossmodule-references/b'), 'B').id
+  moduleB = getChildByName(project, '@typedoc-plugin-resolve-crossmodule-references/b')
+  typeBId = getChildByName(moduleB, 'B').id
 })
 
 test('should resolve references on variables', (t) => {
@@ -109,6 +111,12 @@ test('should resolve references in predicate types', (t) => {
 test('should resolve references in type unions', (t) => {
   const union = getChildByName(moduleA, 'Union')
   t.is(findByName(union?.type?.types, 'B')?.id, typeBId, 'object type of Union refers to B')
+})
+
+test('should resolve references in implements', (t) => {
+  const interfaceIB = getChildByName(moduleB, 'IB')
+  const classImplementsIB = getChildByName(moduleA, 'ImplementsIB')
+  t.is(classImplementsIB.implementedTypes[0].id, interfaceIB.id, 'implements of class refers to interface IB')
 })
 
 function getChildByName(container: any, name: string) {

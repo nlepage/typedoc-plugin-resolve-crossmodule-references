@@ -22,61 +22,65 @@ export function load(app: Application) {
 function visitReflection(context: Context, reflection: Reflection) {
   if (!isTypedReflection(reflection)) return
 
-  checkTyped(context, reflection, 'type')
+  fixTyped(context, reflection, 'type')
+
+  if (reflection instanceof DeclarationReflection) {
+    fixTyped(context, reflection, 'implementedTypes')
+  }
 
   reflection.type?.visit(
     makeRecursiveVisitor({
       array(type) {
-        checkTyped(context, type, 'elementType')
+        fixTyped(context, type, 'elementType')
       },
       conditional(type) {
-        checkTyped(context, type, 'checkType')
-        checkTyped(context, type, 'trueType')
-        checkTyped(context, type, 'falseType')
-        checkTyped(context, type, 'extendsType')
+        fixTyped(context, type, 'checkType')
+        fixTyped(context, type, 'trueType')
+        fixTyped(context, type, 'falseType')
+        fixTyped(context, type, 'extendsType')
       },
       indexedAccess(type) {
-        checkTyped(context, type, 'indexType')
-        checkTyped(context, type, 'objectType')
+        fixTyped(context, type, 'indexType')
+        fixTyped(context, type, 'objectType')
       },
       intersection(type) {
-        checkTyped(context, type, 'types')
+        fixTyped(context, type, 'types')
       },
       mapped(type) {
-        checkTyped(context, type, 'nameType')
-        checkTyped(context, type, 'parameterType')
-        checkTyped(context, type, 'templateType')
+        fixTyped(context, type, 'nameType')
+        fixTyped(context, type, 'parameterType')
+        fixTyped(context, type, 'templateType')
       },
       'named-tuple-member'(type) {
-        checkTyped(context, type, 'element')
+        fixTyped(context, type, 'element')
       },
       optional(type) {
-        checkTyped(context, type, 'elementType')
+        fixTyped(context, type, 'elementType')
       },
       predicate(type) {
-        checkTyped(context, type, 'targetType')
+        fixTyped(context, type, 'targetType')
       },
       query(type) {
-        checkTyped(context, type, 'queryType')
+        fixTyped(context, type, 'queryType')
       },
       reference(type) {
-        checkTyped(context, type, 'typeArguments')
+        fixTyped(context, type, 'typeArguments')
       },
       reflection(type) {
-        checkTyped(context, type.declaration, 'type')
+        fixTyped(context, type.declaration, 'type')
       },
       rest(type) {
-        checkTyped(context, type, 'elementType')
+        fixTyped(context, type, 'elementType')
       },
       tuple(type) {
-        checkTyped(context, type, 'elements')
+        fixTyped(context, type, 'elements')
       },
       // FIXME template-literal?
       typeOperator(type) {
-        checkTyped(context, type, 'target')
+        fixTyped(context, type, 'target')
       },
       union(type) {
-        checkTyped(context, type, 'types')
+        fixTyped(context, type, 'types')
       },
     })
   )
@@ -84,37 +88,31 @@ function visitReflection(context: Context, reflection: Reflection) {
 
 type Typed<F extends string> = { [k in F]?: Type | SomeType | Type[] | undefined }
 
-function checkTyped<F extends string>(context: Context, typed: Typed<F>, f: F) {
+function fixTyped<F extends string>(context: Context, typed: Typed<F>, f: F) {
   const type = typed[f]
-
+  if (!type) return
   if (Array.isArray(type)) {
     type.forEach((iType, i) => {
-      if (!isReferenceType(iType)) return
-
       type[i] = fixType(context, iType)
     })
   } else {
-    if (!isReferenceType(type)) return
-
     typed[f] = fixType(context, type)
   }
 }
 
-function fixType(context: Context, type: ReferenceType) {
-  if (!isReferenceTypeBroken(type)) return type
-
-  return findReferenceType(type, context.project) ?? type
+function fixType(context: Context, type: Type) {
+  if (isReferenceType(type) && isReferenceTypeBroken(type)) return findReferenceType(type, context.project)
+  return type
 }
 
 function findReferenceType(type: ReferenceType, project: ProjectReflection) {
   const newTargetReflection = project.getReflectionsByKind(ReflectionKind.All).find(({ name }) => name === type.name)
-  if (!newTargetReflection) return null
-
+  if (!newTargetReflection) return type
   return ReferenceType.createResolvedReference(type.name, newTargetReflection, project)
 }
 
-function isReferenceType(type?: Type | SomeType): type is ReferenceType {
-  return type?.type === 'reference'
+function isReferenceType(type: Type): type is ReferenceType {
+  return type.type === 'reference'
 }
 
 function isReferenceTypeBroken(type: ReferenceType) {
