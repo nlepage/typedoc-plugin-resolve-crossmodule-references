@@ -1,0 +1,12 @@
+{
+  "name": "@typedoc-plugin-resolve-crossmodule-references/c",
+  "private": true,
+  "packageManager": "yarn@3.1.1",
+  "main": "dist",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
+}

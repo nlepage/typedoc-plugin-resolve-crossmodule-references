@@ -45,7 +45,7 @@
     "clean": "rimraf dist",
     "lint": "tslint -p .",
     "test": "yarn test:clean && yarn test:build && yarn test:generate && ava",
-    "test:build": "yarn workspaces foreach -t --from '{@typedoc-plugin-resolve-crossmodule-references/a,@typedoc-plugin-resolve-crossmodule-references/b}' run build",
+    "test:build": "yarn workspaces foreach -t --from '{@typedoc-plugin-resolve-crossmodule-references/a,@typedoc-plugin-resolve-crossmodule-references/b,@typedoc-plugin-resolve-crossmodule-references/c,@typedoc-plugin-resolve-crossmodule-references/d}' run build",
     "test:clean": "rimraf test/docs.json test/packages/a/dist test/packages/b/dist",
     "test:generate": "cd test && yarn typedoc"
   },

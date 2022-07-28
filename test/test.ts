@@ -5,6 +5,7 @@ import path from 'path'
 let project: any
 let moduleA: any
 let moduleB: any
+let moduleC: any
 let typeBId: any
 let interfaceIBId: any
 
@@ -13,6 +14,7 @@ test.before(async (t) => {
   project = JSON.parse(json.toString('utf8'))
   moduleA = getChildByName(project, '@typedoc-plugin-resolve-crossmodule-references/a')
   moduleB = getChildByName(project, '@typedoc-plugin-resolve-crossmodule-references/b')
+  moduleC = getChildByName(project, '@typedoc-plugin-resolve-crossmodule-references/c')
   typeBId = getChildByName(moduleB, 'B').id
   interfaceIBId = getChildByName(moduleB, 'IB').id
 })
@@ -134,12 +136,30 @@ test('should resolve references in class extends', (t) => {
 test('should keep type arguments', (t) => {
   const typePBId = getChildByName(moduleB, 'PB').id
   const variablePb = getChildByName(moduleA, 'pb')
-  t.is(variablePb?.type?.id, typePBId, 'variable pb refers to type PB')
-  t.deepEqual(variablePb?.type?.typeArguments, [{ type: 'intrinsic', name: 'string' }], 'variable pb has type arguments')
+  t.is(variablePb.type.id, typePBId, 'variable pb refers to type PB')
+  t.deepEqual(variablePb.type.typeArguments, [{ type: 'intrinsic', name: 'string' }], 'variable pb has type arguments')
 })
+
 
 test('should resolve references to import alias', (t) => {
   t.is(getChildByName(moduleA, 'aliasedB').type.id, typeBId, 'variable aliasedB refers to B')
+})
+
+test.failing('should resolve ambiguous type names', (t) => {
+  const ambiguousTypeBId = getChildByName(moduleB, 'Ambiguous').id
+  const variableAmbiguousFromB = getChildByName(moduleA, 'ambiguousFromB')
+  t.is(variableAmbiguousFromB.type.id, ambiguousTypeBId, 'variable ambiguousFromB refers to type Ambiguous from package b')
+
+  const ambiguousTypeCId = getChildByName(moduleC, 'Ambiguous').id
+  const variableAmbiguousFromC = getChildByName(moduleA, 'ambiguousFromC')
+  t.is(variableAmbiguousFromC.type.id, ambiguousTypeCId, 'variable ambiguousFromC refers to type Ambiguous from package c')
+
+  const anotherAmbiguousTypeCId = getChildByName(moduleC, 'AnotherAmbiguous').id
+  const variableAnotherAmbiguousFromC = getChildByName(moduleA, 'anotherAmbiguousFromC')
+  t.is(variableAnotherAmbiguousFromC.type.id, anotherAmbiguousTypeCId, 'variable anotherAmbiguousFromC refers to type AnotherAmbiguous from package c')
+
+  const variableAnotherAmbiguousFromD = getChildByName(moduleA, 'anotherAmbiguousFromD')
+  t.is(variableAnotherAmbiguousFromD.type.id, undefined, 'variable anotherAmbiguousFromD has a broken reference to type AnotherAmbiguous from package d')
 })
 
 function getChildByName(container: any, name: string) {

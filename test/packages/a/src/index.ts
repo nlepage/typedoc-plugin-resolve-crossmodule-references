@@ -111,3 +111,9 @@ export class ExtendsCB extends CB {}
 export const pb: PB<string> = { v: 'foo' }
 
 export const aliasedB: AliasedB = { b: false }
+
+export { ambiguousFromB } from './ambiguous-from-b'
+export { ambiguousFromC } from './ambiguous-from-c'
+
+export { anotherAmbiguousFromC } from './another-ambiguous-from-c'
+export { anotherAmbiguousFromD } from './another-ambiguous-from-d'
