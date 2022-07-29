@@ -119,7 +119,7 @@ function fixType(context: Context, type: Type) {
 }
 
 function findReferenceType(type: ReferenceType, project: ProjectReflection) {
-  const newTarget = project.getReflectionsByKind(ReflectionKind.All).find(({ name }) => name === type.name)
+  const newTarget = project.getReflectionsByKind(ReflectionKind.All).find(({ name }) => name === type.qualifiedName)
   if (!newTarget) return type
 
   const newType = ReferenceType.createResolvedReference(type.name, newTarget, project)
