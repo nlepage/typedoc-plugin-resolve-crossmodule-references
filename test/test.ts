@@ -145,7 +145,7 @@ test('should resolve references to import alias', (t) => {
   t.is(getChildByName(moduleA, 'aliasedB').type.id, typeBId, 'variable aliasedB refers to B')
 })
 
-test.failing('should resolve ambiguous type names', (t) => {
+test('should resolve ambiguous type names', (t) => {
   const ambiguousTypeBId = getChildByName(moduleB, 'Ambiguous').id
   const variableAmbiguousFromB = getChildByName(moduleA, 'ambiguousFromB')
   t.is(variableAmbiguousFromB.type.id, ambiguousTypeBId, 'variable ambiguousFromB refers to type Ambiguous from package b')
