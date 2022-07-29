@@ -176,6 +176,8 @@ __metadata:
   resolution: "@typedoc-plugin-resolve-crossmodule-references/a@workspace:test/packages/a"
   dependencies:
     "@typedoc-plugin-resolve-crossmodule-references/b": "workspace:^"
+    "@typedoc-plugin-resolve-crossmodule-references/c": "workspace:^"
+    "@typedoc-plugin-resolve-crossmodule-references/d": "workspace:^"
     typescript: ^4.7.4
   languageName: unknown
   linkType: soft
@@ -183,6 +185,22 @@ __metadata:
 "@typedoc-plugin-resolve-crossmodule-references/b@workspace:^, @typedoc-plugin-resolve-crossmodule-references/b@workspace:test/packages/b":
   version: 0.0.0-use.local
   resolution: "@typedoc-plugin-resolve-crossmodule-references/b@workspace:test/packages/b"
+  dependencies:
+    typescript: ^4.7.4
+  languageName: unknown
+  linkType: soft
+
+"@typedoc-plugin-resolve-crossmodule-references/c@workspace:^, @typedoc-plugin-resolve-crossmodule-references/c@workspace:test/packages/c":
+  version: 0.0.0-use.local
+  resolution: "@typedoc-plugin-resolve-crossmodule-references/c@workspace:test/packages/c"
+  dependencies:
+    typescript: ^4.7.4
+  languageName: unknown
+  linkType: soft
+
+"@typedoc-plugin-resolve-crossmodule-references/d@workspace:^, @typedoc-plugin-resolve-crossmodule-references/d@workspace:test/packages/d":
+  version: 0.0.0-use.local
+  resolution: "@typedoc-plugin-resolve-crossmodule-references/d@workspace:test/packages/d"
   dependencies:
     typescript: ^4.7.4
   languageName: unknown

@@ -2,7 +2,8 @@
   "entryPointStrategy": "packages",
   "entryPoints": [
     "packages/a",
-    "packages/b"
+    "packages/b",
+    "packages/c"
   ],
   "gitRevision": "main",
   "json": "test.json",

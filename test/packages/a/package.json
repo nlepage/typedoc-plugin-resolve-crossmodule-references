@@ -7,7 +7,9 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@typedoc-plugin-resolve-crossmodule-references/b": "workspace:^"
+    "@typedoc-plugin-resolve-crossmodule-references/b": "workspace:^",
+    "@typedoc-plugin-resolve-crossmodule-references/c": "workspace:^",
+    "@typedoc-plugin-resolve-crossmodule-references/d": "workspace:^"
   },
   "devDependencies": {
     "typescript": "^4.7.4"
