@@ -138,7 +138,7 @@ test('should keep type arguments', (t) => {
   t.deepEqual(variablePb?.type?.typeArguments, [{ type: 'intrinsic', name: 'string' }], 'variable pb has type arguments')
 })
 
-test.failing('should resolve references to import alias', (t) => {
+test('should resolve references to import alias', (t) => {
   t.is(getChildByName(moduleA, 'aliasedB').type.id, typeBId, 'variable aliasedB refers to B')
 })
 
