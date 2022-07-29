@@ -1,4 +1,4 @@
-import { B, IB, CB, PB } from '@typedoc-plugin-resolve-crossmodule-references/b'
+import { B, IB, CB, PB, B as AliasedB } from '@typedoc-plugin-resolve-crossmodule-references/b'
 
 export const b: B = { b: true }
 export const bArray: B[] = []
@@ -109,3 +109,5 @@ export interface ExtendsIB extends IB {}
 export class ExtendsCB extends CB {}
 
 export const pb: PB<string> = { v: 'foo' }
+
+export const aliasedB: AliasedB = { b: false }
