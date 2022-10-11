@@ -38,6 +38,10 @@ function visitReflection(
     recursivelyFixTyped(project, reflection, 'extendedTypes', fileNameToModule)
     recursivelyFixTyped(project, reflection, 'implementedTypes', fileNameToModule)
   }
+
+  if (reflection instanceof TypeParameterReflection) {
+    recursivelyFixTyped(project, reflection, 'default', fileNameToModule)
+  }
 }
 
 type Typed<F extends string> = { [k in F]?: Type | SomeType | Type[] | undefined }
