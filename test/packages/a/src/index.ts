@@ -110,6 +110,8 @@ export class ExtendsCB extends CB {}
 
 export const pb: PB<string> = { v: 'foo' }
 
+export function f<T extends IB = IB>(b: T) {}
+
 export const aliasedB: AliasedB = { b: false }
 
 export { ambiguousFromB } from './ambiguous-from-b'
