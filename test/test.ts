@@ -140,7 +140,7 @@ test('should keep type arguments', (t) => {
   t.deepEqual(variablePb.type.typeArguments, [{ type: 'intrinsic', name: 'string' }], 'variable pb has type arguments')
 })
 
-test.failing('should resolve extends in type parameters', (t) => {
+test('should resolve extends in type parameters', (t) => {
   const functionF = getChildByName(moduleA, 'f')
   t.is(functionF.signatures[0].typeParameter[0].type.id, interfaceIBId, 'type parameter extends referers to IB')
   t.is(functionF.signatures[0].typeParameter[0].default.id, interfaceIBId, 'type parameter extends default referers to IB')
