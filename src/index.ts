@@ -162,7 +162,10 @@ function findReferenceType(
     const moduleFilePath = findModuleFilePath(fileName)
     if (!moduleFilePath) return type
 
-    const moduleName = JSON.parse(readFileSync(moduleFilePath).toString('utf8')).name
+    const moduleConfig = JSON.parse(readFileSync(moduleFilePath).toString('utf8'))
+    // Ideally we wouldn't use typedoc's displayName and look for the module by originalName
+    // But typedoc sets originalName to the same value as displayName...
+    const moduleName = moduleConfig?.typedoc?.displayName ?? moduleConfig.name
 
     module = project.getChildrenByKind(ReflectionKind.Module).find(({ name }) => moduleName === name)
 
