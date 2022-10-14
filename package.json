@@ -1,6 +1,6 @@
 {
   "name": "typedoc-plugin-resolve-crossmodule-references",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "TypeDoc plugin for resolving cross module reference in a mono-repository",
   "main": "dist",
   "repository": "https://github.com/nlepage/typedoc-plugin-resolve-crossmodule-references",
