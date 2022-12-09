@@ -3,7 +3,10 @@
   "version": "0.3.2",
   "description": "TypeDoc plugin for resolving cross module reference in a mono-repository",
   "main": "dist",
-  "repository": "https://github.com/nlepage/typedoc-plugin-resolve-crossmodule-references",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nlepage/typedoc-plugin-resolve-crossmodule-references"
+  },
   "author": {
     "name": "Nicolas Lepage",
     "url": "https://github.com/nlepage"
@@ -13,7 +16,7 @@
     "typedoc-plugin"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=14"
   },
   "files": [
     "dist"
@@ -27,7 +30,7 @@
   },
   "devDependencies": {
     "@ava/typescript": "^3.0.1",
-    "@tsconfig/node16": "^1.0.3",
+    "@tsconfig/node14": "^1.0.3",
     "@types/node": "^18.8.4",
     "ava": "^4.3.3",
     "prettier": "^2.7.1",

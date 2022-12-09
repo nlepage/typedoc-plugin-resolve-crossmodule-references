@@ -9,13 +9,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]      
     steps:
-    - uses: actions/checkout@v2
-    - name: Install Node.js 16
-      uses: actions/setup-node@v2
+    - uses: actions/checkout@v3
+    - name: Install Node.js v${{ matrix.node-version }}
+      uses: actions/setup-node@v3
       with:
-        node-version: 16
+        node-version: ${{ matrix.node-version }}
     - name: Install dependencies
       run: yarn install --immutable
     - name: CI
