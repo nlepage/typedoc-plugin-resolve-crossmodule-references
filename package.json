@@ -31,16 +31,16 @@
   "devDependencies": {
     "@ava/typescript": "^3.0.1",
     "@tsconfig/node14": "^1.0.3",
-    "@types/node": "^18.8.4",
-    "ava": "^4.3.3",
-    "prettier": "^2.7.1",
+    "@types/node": "^18.11.12",
+    "ava": "^5.1.0",
+    "prettier": "^2.8.1",
     "rimraf": "^3.0.2",
     "ts-node": "^10.9.1",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.3.0",
-    "typedoc": "^0.23.16",
-    "typescript": "^4.8.4"
+    "typedoc": "^0.23.21",
+    "typescript": "^4.9.4"
   },
   "scripts": {
     "build": "yarn clean && tsc",
