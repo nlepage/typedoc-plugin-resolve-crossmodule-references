@@ -8,6 +8,7 @@ let moduleB: any
 let moduleC: any
 let typeBId: any
 let interfaceIBId: any
+let linksToBComment: any
 
 test.before(async (t) => {
   const json = await fs.readFile(path.resolve(__dirname, 'test.json'))
@@ -17,6 +18,7 @@ test.before(async (t) => {
   moduleC = getChildByName(project, '@typedoc-plugin-resolve-crossmodule-references/c')
   typeBId = getChildByName(moduleB, 'B').id
   interfaceIBId = getChildByName(moduleB, 'IB').id
+  linksToBComment = getChildByName(moduleA, 'SeeB').comment
 })
 
 test('should resolve references on variables', (t) => {
@@ -167,10 +169,26 @@ test('should resolve ambiguous type names', (t) => {
   t.is(variableAnotherAmbiguousFromD.type.id, undefined, 'variable anotherAmbiguousFromD has a broken reference to type AnotherAmbiguous from package d')
 })
 
+test.failing('should resolve link', (t) => {
+  t.is(findBy(linksToBComment.summary, 'text', 'B').target, typeBId, 'link to B refers to B')
+})
+
+test.failing('should resolve link with text', (t) => {
+  t.is(findBy(linksToBComment.summary, 'text', 'B | A link to B').target, typeBId, 'link to B refers to B')
+})
+
+test.failing('should resolve link in @see tag', (t) => {
+  t.is(findBy(findBy(linksToBComment.blockTags, 'tag', '@see').content, 'text', 'B').target, typeBId, 'link to B refers to B')
+})
+
 function getChildByName(container: any, name: string) {
   return findByName(container?.children, name)
 }
 
 function findByName(elements: any, name: string) {
-  return elements?.find((element: any) => element?.name === name)
+  return findBy(elements, 'name', name)
+}
+
+function findBy(elements: any, key: string, value: string) {
+  return elements?.find((element: any) => element?.[key] === value)
 }

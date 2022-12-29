@@ -119,3 +119,10 @@ export { ambiguousFromC } from './ambiguous-from-c'
 
 export { anotherAmbiguousFromC } from './another-ambiguous-from-c'
 export { anotherAmbiguousFromD } from './another-ambiguous-from-d'
+
+/**
+ * A link to B {@link B}
+ * {@link B | A link to B}
+ * @see {@link B}
+ */
+export type SeeB = {}
